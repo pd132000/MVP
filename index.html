@@ -1,0 +1,114 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>MVP Odds</title>
+</head>
+<body>
+  <h1>Welcome to MVP Odds</h1>
+  
+  <div id="login-container">
+    <form id="login-form">
+      <label for="username">Username:</label>
+      <input type="text" id="username" name="username" required>
+      <label for="password">Password:</label>
+      <input type="password" id="password" name="password" required>
+      <button type="submit">Login</button>
+    </form>
+    <br>
+    <form id="signup-form">
+      <label for="new-username">New username:</label>
+      <input type="text" id="new-username" name="new-username" required>
+      <label for="new-password">New password:</label>
+      <input type="password" id="new-password" name="new-password" required>
+      <button type="submit">Sign up</button>
+    </form>
+  </div>
+  
+  <div id="odds-container" style="display: none;">
+    <button id="logout-button">Logout</button>
+    <div id="odds"></div>
+  </div>
+
+  <script>
+    const loginForm = document.querySelector('#login-form');
+    const signupForm = document.querySelector('#signup-form');
+    const loginContainer = document.querySelector('#login-container');
+    const oddsContainer = document.querySelector('#odds-container');
+    const oddsDiv = document.querySelector('#odds');
+    const logoutButton = document.querySelector('#logout-button');
+    
+    let oddsCache = {};
+    
+    loginForm.addEventListener('submit', async event => {
+      event.preventDefault();
+      
+      const username = event.target.elements['username'].value;
+      const password = event.target.elements['password'].value;
+      
+      if (!username || !password) {
+        alert('Please enter a username and password');
+        return;
+      }
+      
+      try {
+        const token = await login(username, password);
+        
+        // save token to local storage
+        saveToken(token);
+        
+        // hide login form
+        loginContainer.style.display = 'none';
+        
+        // show odds container
+        oddsContainer.style.display = 'block';
+        
+        // load odds
+        await loadOdds();
+      } catch (error) {
+        console.error(error);
+        
+        // display error message to user
+        let errorMessage = 'Login failed';
+        
+        if (error.message === 'Invalid username or password') {
+          errorMessage = 'Invalid username or password';
+        } else if (error.message === 'Unexpected server error') {
+          errorMessage = 'An unexpected error occurred, please try again later';
+        }
+        
+        alert(errorMessage);
+      }
+    });
+    
+    signupForm.addEventListener('submit', async event => {
+      event.preventDefault();
+      
+      const username = event.target.elements['new-username'].value;
+      const password = event.target.elements['new-password'].value;
+      
+      if (!username || !password) {
+        alert('Please enter a username and password');
+        return;
+      }
+      
+      try {
+        const token = await signup(username, password);
+        
+        // save token to local storage
+        saveToken(token);
+        
+        // hide login form
+        loginContainer.style.display = 'none';
+        
+        // show odds container
+        oddsContainer.style.display = 'block';
+        
+        // load odds
+        await loadOdds();
+      } catch (error) {
+        console.error(error);
+        
+        // display error message to user
+        let errorMessage = 'Sign up failed';
+        
+        if (error.message === 'Username already exists
